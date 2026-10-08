@@ -1,7 +1,7 @@
-import cds from '@sap/cds'
-import * as remoteCall from './extcalls/remoteCall4_form22.js'
+const cds = require('@sap/cds')
+const remoteCall = require('./extcalls/remoteCall4_form22')
 
-export default class Zform22Service extends cds.ApplicationService {
+module.exports = class Zform22Service extends cds.ApplicationService {
     init() {
         const { ZC_ITEMDETAILS, ZI_OVS_VH, ZI_OVS_INVOICE_VH, ZI_OVS_ENGINE_VH } = this.entities
 

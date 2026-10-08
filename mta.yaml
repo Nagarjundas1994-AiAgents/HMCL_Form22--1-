@@ -7,7 +7,6 @@ modules:
     type: nodejs
     path: gen/srv
     requires:
-      - name: hmcl_Form22-db
       - name: hmcl_Form22-destination-service
       - name: hmcl_Form22-connectivity
       - name: uaa_hmcl_Form22
@@ -20,13 +19,6 @@ modules:
       instances: 1
     build-parameters:
       builder: npm-ci
-  - name: hmcl_Form22-db-deployer
-    type: hdb
-    path: gen/db
-    requires:
-      - name: hmcl_Form22-db
-    parameters:
-      buildpack: nodejs_buildpack
   - name: hmcl_Form22-app-content
     type: com.sap.application.content
     path: .
@@ -95,11 +87,6 @@ modules:
     build-parameters:
       no-source: true
 resources:
-  - name: hmcl_Form22-db
-    type: com.sap.xs.hdi-container
-    parameters:
-      service: hana
-      service-plan: hdi-shared
   - name: hmcl_Form22-repo-host
     type: org.cloudfoundry.managed-service
     parameters:
@@ -132,6 +119,12 @@ resources:
   - name: uaa_hmcl_Form22
     type: org.cloudfoundry.managed-service
     parameters:
+      config:
+        oauth2-configuration:
+          credential-types:
+            - binding-secret
+            - x509
+        tenant-mode: dedicated
       path: ./xs-security.json
       service: xsuaa
       service-name: hmcl_Form22-xsuaa-service

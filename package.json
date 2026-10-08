@@ -1,9 +1,7 @@
 {
   "name": "hmcl_Form22",
   "version": "1.0.0",
-  "type": "module",
   "dependencies": {
-    "@cap-js/hana": "^3",
     "@sap/cds": "^10",
     "@sap-cloud-sdk/connectivity": "^4",
     "@sap-cloud-sdk/http-client": "^4",
@@ -19,8 +17,6 @@
   },
   "scripts": {
     "start": "cds-serve",
-    "watch-form22ui": "cds watch --open hmcl.form22ui/index.html?sap-ui-xx-viewCache=false --livereload false",
-    "watch-mock": "cds watch --profile development,mock --open hmcl.form22ui/index.html?sap-ui-xx-viewCache=false --livereload false",
     "undeploy": "cf undeploy hmcl_Form22 --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
@@ -40,21 +36,7 @@
       },
       "destinations": true,
       "connectivity": true,
-      "[development]": {
-        "auth": {
-          "kind": "mocked",
-          "users": {
-            "P12345": { "password": "" },
-            "D11685": { "password": "" }
-          }
-        }
-      },
-      "[production]": {
-        "auth": "xsuaa"
-      }
-    },
-    "[mock]": {
-      "mockBackend": true
+      "auth": "xsuaa"
     },
     "server": {
       "body_parser": {

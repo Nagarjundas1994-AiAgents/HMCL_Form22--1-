@@ -47,11 +47,11 @@
                             <Button text="{i18n>print}" icon="sap-icon://print" type="Transparent" press=".onPrint"
                                 enabled="{= ${view>/selCount} > 0 }"/>
                             <Button text="{i18n>change}" icon="sap-icon://edit" type="Transparent" press=".onChange"
-                                enabled="{= ${view>/selCount} === 1 }"/>
+                                visible="{session>/canChangeDealer}" enabled="{= ${view>/selCount} === 1 }"/>
                             <Button text="{i18n>selectAll}" icon="sap-icon://multiselect-all" type="Transparent"
-                                press=".onSelectAll" enabled="{= ${view>/rows}.length > 0 }"/>
+                                press=".onSelectAll" visible="{session>/canChangeDealer}" enabled="{= ${view>/rows}.length > 0 }"/>
                             <Button text="{i18n>deselectAll}" icon="sap-icon://multiselect-none" type="Transparent"
-                                press=".onDeselectAll" enabled="{= ${view>/selCount} > 0 }"/>
+                                press=".onDeselectAll" visible="{session>/canChangeDealer}" enabled="{= ${view>/selCount} > 0 }"/>
                             <ToolbarSpacer/>
                             <SearchField width="18rem" visible="{view>/filterVisible}" value="{view>/filterValue}"
                                 placeholder="{i18n>filterPlaceholder}" liveChange=".onFilter" search=".onFilter"/>

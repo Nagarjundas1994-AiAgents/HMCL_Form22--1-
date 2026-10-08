@@ -1,10 +1,10 @@
 // Backend calls of the Form 22 proxy, aligned with HMCL_TAN_MAINTENANCE (srv/extcalls/remoteCall4_tan.js).
 // User rule (same as TAN): id must start with P (internal, unrestricted) or D (dealer, restricted to own Kunnr).
 // The dealer's Kunnr comes from the backend's checkUserAuth action.
-import cds from '@sap/cds'
+const cds = require('@sap/cds')
 
 const NS = 'com.sap.gateway.srvd.zsb_itemdetails.v0001'
-const ext = async () => cds.env.mockBackend ? (await import('./localBackend.js')).default : cds.connect.to('ZSB_ITEMDETAILS0001')
+const ext = () => cds.connect.to('ZSB_ITEMDETAILS0001')
 const q = v => String(v).replace(/'/g, "''")
 const item = k => `ZC_ITEMDETAILS(Kunnr='${q(k.Kunnr)}',invoice='${q(k.invoice)}',frameno='${q(k.frameno)}',engineno='${q(k.engineno)}')`
 
@@ -38,7 +38,7 @@ const wrap = (tag, fn) => async req => {
   }
 }
 
-export const read = wrap('read', async req => {
+exports.read = wrap('read', async req => {
   const service = await ext()
   const kunnr = await dealerOf(service, req)
   if (kunnr && req.query.SELECT) {
@@ -56,10 +56,10 @@ const bound = (tag, action, data) => wrap(tag, async req => {
   return service.tx(req).send({ method: 'POST', path: `${item(key)}/${NS}.${action}`, data: data(req) })
 })
 
-export const changeFrame = bound('changeFrame', 'changeFrame', req => req.data)
-export const printForm = bound('printForm', 'printForm', () => ({}))
+exports.changeFrame = bound('changeFrame', 'changeFrame', req => req.data)
+exports.printForm = bound('printForm', 'printForm', () => ({}))
 
 // the user always comes from the logged-in session, never from the client (the request body is not forwarded)
-export const checkUserAuth = wrap('checkUserAuth', async req => auth(await ext(), req, getUser(req)))
+exports.checkUserAuth = wrap('checkUserAuth', async req => auth(await ext(), req, getUser(req)))
 
-export const getUserInfo = wrap('getUserInfo', async req => ({ userId: getUser(req) }))
+exports.getUserInfo = wrap('getUserInfo', async req => ({ userId: getUser(req) }))
