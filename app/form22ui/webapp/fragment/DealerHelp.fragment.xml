@@ -1,0 +1,6 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <SelectDialog title="{i18n>dealerHelpTitle}" noDataText="{i18n>noData}" items="{/ZI_OVS_VH}"
+        search=".onDealerSearch" liveChange=".onDealerSearch" confirm=".onDealerPicked">
+        <StandardListItem title="{name1}" description="{kunnr}" info="{ort01}"/>
+    </SelectDialog>
+</core:FragmentDefinition>

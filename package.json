@@ -1,0 +1,68 @@
+{
+  "name": "hmcl_Form22",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@cap-js/hana": "^3",
+    "@sap/cds": "^10",
+    "@sap-cloud-sdk/connectivity": "^4",
+    "@sap-cloud-sdk/http-client": "^4",
+    "@sap-cloud-sdk/resilience": "^4",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^3",
+    "@sap/cds-dk": "^10",
+    "cds-plugin-ui5": "^0.17.0",
+    "mbt": "^1.2.49",
+    "rimraf": "^5.0.5"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-form22ui": "cds watch --open hmcl.form22ui/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-mock": "cds watch --profile development,mock --open hmcl.form22ui/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "undeploy": "cf undeploy hmcl_Form22 --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  },
+  "private": true,
+  "cds": {
+    "requires": {
+      "ZSB_ITEMDETAILS0001": {
+        "kind": "odata",
+        "model": "srv/external/ZSB_ITEMDETAILS0001",
+        "credentials": {
+          "destination": "BAS",
+          "path": "/sap/opu/odata4/sap/zsrv_itemdetails_v4/srvd/sap/zsb_itemdetails/0001/"
+        },
+        "csrf": true,
+        "csrfInBatch": true
+      },
+      "destinations": true,
+      "connectivity": true,
+      "[development]": {
+        "auth": {
+          "kind": "mocked",
+          "users": {
+            "P12345": { "password": "" },
+            "D11685": { "password": "" }
+          }
+        }
+      },
+      "[production]": {
+        "auth": "xsuaa"
+      }
+    },
+    "[mock]": {
+      "mockBackend": true
+    },
+    "server": {
+      "body_parser": {
+        "limit": "50mb"
+      }
+    }
+  },
+  "workspaces": [
+    "app/*"
+  ]
+}

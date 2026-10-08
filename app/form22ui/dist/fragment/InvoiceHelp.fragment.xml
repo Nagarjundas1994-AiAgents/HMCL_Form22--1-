@@ -1,0 +1,6 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <SelectDialog title="{i18n>invoiceHelpTitle}" noDataText="{i18n>noData}" items="{/ZI_OVS_INVOICE_VH}"
+        search=".onInvoiceSearch" liveChange=".onInvoiceSearch" confirm=".onInvoicePicked">
+        <StandardListItem title="{invoice}" description="{path:'dt1', type:'sap.ui.model.odata.type.Date'}"/>
+    </SelectDialog>
+</core:FragmentDefinition>

@@ -1,0 +1,2 @@
+sap.ui.define(["sap/ui/model/json/JSONModel","sap/ui/Device"],function(e,n){"use strict";return{createDeviceModel:function(){var r=new e(n);r.setDefaultBindingMode("OneWay");return r},createSessionModel:function(){return new e({authorized:false,canChangeDealer:false,kunnr:"",name1:"",welcome:"",error:""})}}});
+//# sourceMappingURL=models.js.map

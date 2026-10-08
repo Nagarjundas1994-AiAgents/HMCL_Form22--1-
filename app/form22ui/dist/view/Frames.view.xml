@@ -1,0 +1,87 @@
+<mvc:View controllerName="hmcl.form22ui.controller.Frames"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Page id="page" class="f22Page" showHeader="true" enableScrolling="true" busy="{view>/busy}" busyIndicatorDelay="300">
+        <customHeader>
+            <Bar class="f22Bar">
+                <contentLeft>
+                    <Title text="{i18n>title}" level="H1"/>
+                </contentLeft>
+                <contentRight>
+                    <Text text="{session>/welcome}" class="f22Welcome"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
+        <content>
+            <Text text="{i18n>breadcrumb}" class="f22Crumb sapUiSmallMarginBeginEnd sapUiSmallMarginTop"/>
+            <Panel class="f22Panel f22Wide f22Frames sapUiSmallMargin">
+                <headerToolbar>
+                    <Toolbar class="f22PanelHdr f22PanelHdrBlue">
+                        <Title text="{i18n>frameDetails}"/>
+                    </Toolbar>
+                </headerToolbar>
+                <VBox visible="{view>/preview}">
+                    <Toolbar>
+                        <Button text="{i18n>close}" icon="sap-icon://decline" press=".onClosePreview"/>
+                        <Select items="{view>/pdfs}" change=".onPdfSelect" visible="{= ${view>/pdfs}.length > 1 }">
+                            <core:Item key="{view>name}" text="{view>name}"/>
+                        </Select>
+                    </Toolbar>
+                    <core:HTML id="pdfFrame" content=""/>
+                </VBox>
+                <VBox visible="{= !${view>/preview} }">
+                <HBox alignItems="Center" class="sapUiSmallMarginBottom">
+                    <Button text="{i18n>back}" icon="sap-icon://nav-back" press=".onBack" class="sapUiSmallMarginEnd"/>
+                    <Label text="{i18n>invoiceNumber}:" labelFor="invoiceNo" design="Bold" class="sapUiTinyMarginEnd"/>
+                    <Input id="invoiceNo" value="{view>/invoice}" editable="false" width="11rem"/>
+                </HBox>
+                <MessageStrip text="{view>/error}" type="Warning" showIcon="true"
+                    visible="{= !!${view>/error} }" class="sapUiSmallMarginBottom"/>
+                <Table id="frames" items="{view>/rows}" growing="true" growingThreshold="50"
+                    sticky="ColumnHeaders,HeaderToolbar" noDataText="{i18n>noData}" class="f22Table">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <Button text="{i18n>filter}" icon="sap-icon://filter" type="Transparent" press=".onToggleFilter"
+                                enabled="{= ${view>/rows}.length > 0 }"/>
+                            <Button text="{i18n>print}" icon="sap-icon://print" type="Transparent" press=".onPrint"
+                                enabled="{= ${view>/selCount} > 0 }"/>
+                            <Button text="{i18n>change}" icon="sap-icon://edit" type="Transparent" press=".onChange"
+                                enabled="{= ${view>/selCount} === 1 }"/>
+                            <Button text="{i18n>selectAll}" icon="sap-icon://multiselect-all" type="Transparent"
+                                press=".onSelectAll" enabled="{= ${view>/rows}.length > 0 }"/>
+                            <Button text="{i18n>deselectAll}" icon="sap-icon://multiselect-none" type="Transparent"
+                                press=".onDeselectAll" enabled="{= ${view>/selCount} > 0 }"/>
+                            <ToolbarSpacer/>
+                            <SearchField width="18rem" visible="{view>/filterVisible}" value="{view>/filterValue}"
+                                placeholder="{i18n>filterPlaceholder}" liveChange=".onFilter" search=".onFilter"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <columns>
+                        <Column><Text text="{i18n>model}"/></Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true" width="15rem"><Text text="{i18n>frameNumber}"/></Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true" width="13rem"><Text text="{i18n>engineNumber}"/></Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true" width="12rem"><Text text="{i18n>printStatus}"/></Column>
+                        <Column hAlign="Center" width="9rem"><Text text="{i18n>selectForPrinting}"/></Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{view>model}"/>
+                                <Text text="{view>frameno}"/>
+                                <Text text="{view>engineno}"/>
+                                <Text text="{view>status}" class="f22Status">
+                                    <customData>
+                                        <core:CustomData key="status" value="{view>status}" writeToDom="true"/>
+                                    </customData>
+                                </Text>
+                                <CheckBox selected="{view>selected}" enabled="{view>printable}" select=".onSelect"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+                </VBox>
+            </Panel>
+        </content>
+    </Page>
+</mvc:View>

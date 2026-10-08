@@ -1,0 +1,6 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <SelectDialog title="{i18n>newFrame}" noDataText="{i18n>noFreeFrames}" items="{/ZI_OVS_ENGINE_VH}"
+        confirm=".onNewFramePicked">
+        <StandardListItem title="{frameno}" description="{engineno}" info="{matnr}"/>
+    </SelectDialog>
+</core:FragmentDefinition>

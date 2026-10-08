@@ -1,0 +1,58 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+    <Dialog title="{i18n>vinTitle}" contentWidth="46rem" contentHeight="34rem" draggable="true" resizable="true"
+        stretch="{device>/system/phone}">
+        <Panel class="f22Search">
+            <headerToolbar>
+                <Toolbar>
+                    <Title text="{i18n>searchCriteria}"/>
+                    <ToolbarSpacer/>
+                    <Link text="{= ${vin>/criteria} ? ${i18n>hideCriteria} : ${i18n>showCriteria} }" press=".onVinToggle"/>
+                </Toolbar>
+            </headerToolbar>
+            <VBox visible="{vin>/criteria}">
+            <f:SimpleForm editable="true" layout="ColumnLayout" columnsM="1" columnsL="1" columnsXL="1">
+                <Label text="{i18n>frameNo}"/>
+                <Input value="{vin>/frame}" maxLength="17" submit=".onVinSearch"/>
+                <Label text="{i18n>engineNo}"/>
+                <Input value="{vin>/engine}" maxLength="17" submit=".onVinSearch"/>
+                <Label text="{i18n>dispatchDate}"/>
+                <DatePicker value="{vin>/date}" valueFormat="yyyy-MM-dd" displayFormat="dd.MM.yyyy"/>
+            </f:SimpleForm>
+            <HBox class="sapUiSmallMarginBegin">
+                <Button text="{i18n>startSearch}" press=".onVinSearch" class="sapUiTinyMarginEnd"/>
+                <Button text="{i18n>reset}" press=".onVinReset"/>
+            </HBox>
+            </VBox>
+        </Panel>
+        <Table items="{vin>/results}" mode="SingleSelectMaster" selectionChange=".onVinSelect"
+            growing="true" growingThreshold="100" noDataText="{i18n>noData}">
+            <headerToolbar>
+                <Toolbar>
+                    <Title text="{vin>/title}" level="H4"/>
+                </Toolbar>
+            </headerToolbar>
+            <columns>
+                <Column><Text text="{i18n>material}"/></Column>
+                <Column><Text text="{i18n>frameNo}"/></Column>
+                <Column><Text text="{i18n>engineNo}"/></Column>
+                <Column><Text text="{i18n>dispatchDate}"/></Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{vin>matnr}"/>
+                        <Text text="{vin>frameno}"/>
+                        <Text text="{vin>engineno}"/>
+                        <Text text="{vin>date}"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        <beginButton>
+            <Button text="{i18n>ok}" type="Emphasized" press=".onVinOk" enabled="{vin>/selected}"/>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press=".onVinCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
