@@ -23,7 +23,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/zform22/",
+        "uri": "/srv-api/odata/v4/zform22/",
         "type": "OData",
         "settings": {
           "annotations": [],

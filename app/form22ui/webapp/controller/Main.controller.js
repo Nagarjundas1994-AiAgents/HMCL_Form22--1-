@@ -125,10 +125,7 @@ sap.ui.define([
         },
 
         _resetDealer() {
-            const oSession = this.getOwnerComponent().getModel("session");
-            if (oSession.getProperty("/authorized")) {
-                this._setDealer(oSession.getProperty("/kunnr"), oSession.getProperty("/name1"));
-            }
+            this._setDealer(this.getOwnerComponent().getModel("session").getProperty("/kunnr"), "");
             this._validate();
         },
 

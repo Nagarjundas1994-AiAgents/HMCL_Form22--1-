@@ -22,11 +22,6 @@ service zform22Service {
     
     entity ZI_OVS_ENGINE_VH as projection on external.ZI_OVS_ENGINE_VH;
 
-    action checkUserAuth(lv_user: String(12),
-                         is_authorized: Boolean,
-                         change_visi: Boolean,
-                         kunnr: String(10),
-                         name1: String(40)) returns external.ZA_USERPARA;
 
     function getUserInfo() returns { userId : String };
                          

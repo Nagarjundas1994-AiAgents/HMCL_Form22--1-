@@ -2,7 +2,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <Page id="page" class="f22Page" showHeader="true" enableScrolling="true" busy="{view>/busy}" busyIndicatorDelay="300">
+    <Page id="framesPage" class="f22Page" showHeader="true" enableScrolling="true" busy="{view>/busy}" busyIndicatorDelay="300">
         <customHeader>
             <Bar class="f22Bar">
                 <contentLeft>
@@ -47,11 +47,11 @@
                             <Button text="{i18n>print}" icon="sap-icon://print" type="Transparent" press=".onPrint"
                                 enabled="{= ${view>/selCount} > 0 }"/>
                             <Button text="{i18n>change}" icon="sap-icon://edit" type="Transparent" press=".onChange"
-                                visible="{session>/canChangeDealer}" enabled="{= ${view>/selCount} === 1 }"/>
+                                visible="{session>/isEditable}" enabled="{= ${view>/selCount} === 1 }"/>
                             <Button text="{i18n>selectAll}" icon="sap-icon://multiselect-all" type="Transparent"
-                                press=".onSelectAll" visible="{session>/canChangeDealer}" enabled="{= ${view>/rows}.length > 0 }"/>
+                                press=".onSelectAll" visible="{session>/isEditable}" enabled="{= ${view>/rows}.length > 0 }"/>
                             <Button text="{i18n>deselectAll}" icon="sap-icon://multiselect-none" type="Transparent"
-                                press=".onDeselectAll" visible="{session>/canChangeDealer}" enabled="{= ${view>/selCount} > 0 }"/>
+                                press=".onDeselectAll" visible="{session>/isEditable}" enabled="{= ${view>/selCount} > 0 }"/>
                             <ToolbarSpacer/>
                             <SearchField width="18rem" visible="{view>/filterVisible}" value="{view>/filterValue}"
                                 placeholder="{i18n>filterPlaceholder}" liveChange=".onFilter" search=".onFilter"/>

@@ -3,10 +3,11 @@
   "authenticationMethod": "route",
   "routes": [
     {
-      "source": "^/odata/v4/zform22/(.*)$",
-      "target": "/odata/v4/zform22/$1",
+      "source": "^/srv-api/(.*)$",
+      "target": "$1",
       "destination": "hmcl_Form22-srv-api",
-      "authenticationType": "xsuaa"
+      "authenticationType": "xsuaa",
+      "csrfProtection": false
     },
     {
       "source": "^/resources/(.*)$",

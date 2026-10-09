@@ -1,7 +1,7 @@
 <mvc:View controllerName="hmcl.form22ui.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
-    <Page id="page" class="f22Page" showHeader="true" enableScrolling="true">
+    <Page id="mainPage" class="f22Page" showHeader="true" enableScrolling="true">
         <customHeader>
             <Bar class="f22Bar">
                 <contentLeft>
@@ -14,8 +14,6 @@
         </customHeader>
         <content>
             <Text text="{i18n>breadcrumb}" class="f22Crumb sapUiSmallMarginBeginEnd sapUiSmallMarginTop"/>
-            <MessageStrip text="{session>/error}" type="Error" showIcon="true"
-                visible="{= !!${session>/error} }" class="sapUiSmallMargin"/>
             <Panel class="f22Panel f22Narrow sapUiSmallMargin">
                 <headerToolbar>
                     <Toolbar class="f22PanelHdr">
@@ -29,7 +27,7 @@
                             <HBox alignItems="Center">
                                 <Input id="dealer" value="{view>/kunnr}" maxLength="10" width="9rem"
                                     placeholder="{i18n>dealerPlaceholder}"
-                                    editable="{session>/canChangeDealer}" showValueHelp="true"
+                                    editable="{session>/isEditable}" showValueHelp="true"
                                     valueHelpRequest=".onDealerHelp" change=".onDealerChange"
                                     valueState="{view>/dealerState}" valueStateText="{view>/dealerError}"/>
                                 <Text text="{view>/name1}" class="f22DealerName sapUiSmallMarginBegin"/>
@@ -42,7 +40,7 @@
                         <Label text="{i18n>invoiceNumber}" labelFor="invoice" design="Bold" required="true" width="9rem" class="f22Lbl"/>
                         <Input id="invoice" value="{view>/invoice}" maxLength="10" width="12rem"
                             placeholder="{i18n>invoicePlaceholder}"
-                            editable="{= ${session>/authorized} &amp;&amp; ${view>/step} === 1 }" showValueHelp="true"
+                            editable="{= ${view>/step} === 1 }" showValueHelp="true"
                             valueHelpRequest=".onInvoiceHelp" change=".onInvoiceChange" submit=".onContinue"
                             valueState="{view>/invoiceState}" valueStateText="{view>/invoiceError}"/>
                     </HBox>
@@ -50,14 +48,14 @@
                         <Label text="{i18n>vinNumber}" labelFor="vin" design="Bold" required="true" width="9rem" class="f22Lbl"/>
                         <Input id="vin" value="{view>/frame}" maxLength="17" width="14rem"
                             placeholder="{i18n>vinPlaceholder}"
-                            editable="{session>/authorized}" showValueHelp="true"
+                            showValueHelp="true"
                             valueHelpRequest=".onVinHelp" change=".onFrameChange" submit=".onProceed"
                             valueState="{view>/frameState}" valueStateText="{view>/frameError}"/>
                     </HBox>
                 </VBox>
                 <HBox class="sapUiSmallMarginBegin sapUiSmallMarginBottom">
                     <Button text="{i18n>continue}" type="Emphasized" press=".onContinue"
-                        visible="{= ${view>/step} === 1 }" enabled="{session>/authorized}"/>
+                        visible="{= ${view>/step} === 1 }"/>
                     <Button text="{i18n>changeInvoice}" press=".onChangeInvoice" class="sapUiTinyMarginEnd"
                         visible="{= ${view>/step} === 2 }"/>
                     <Button text="{i18n>proceed}" type="Emphasized" icon="sap-icon://navigation-right-arrow"

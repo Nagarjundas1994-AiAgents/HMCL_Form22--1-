@@ -8,7 +8,6 @@ module.exports = class Zform22Service extends cds.ApplicationService {
         this.on('READ', [ZC_ITEMDETAILS, ZI_OVS_VH, ZI_OVS_INVOICE_VH, ZI_OVS_ENGINE_VH], remoteCall.read)
         this.on('changeFrame', ZC_ITEMDETAILS, remoteCall.changeFrame)
         this.on('printForm', ZC_ITEMDETAILS, remoteCall.printForm)
-        this.on('checkUserAuth', remoteCall.checkUserAuth)
         this.on('getUserInfo', remoteCall.getUserInfo)
 
         return super.init()

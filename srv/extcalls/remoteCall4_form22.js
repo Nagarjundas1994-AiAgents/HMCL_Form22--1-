@@ -1,6 +1,6 @@
 // Backend calls of the Form 22 proxy, aligned with HMCL_TAN_MAINTENANCE (srv/extcalls/remoteCall4_tan.js).
 // User rule (same as TAN): id must start with P (internal, unrestricted) or D (dealer, restricted to own Kunnr).
-// The dealer's Kunnr comes from the backend's checkUserAuth action.
+// The dealer's Kunnr is the user id without the leading D (TAN: Customer = id without D).
 const cds = require('@sap/cds')
 
 const NS = 'com.sap.gateway.srvd.zsb_itemdetails.v0001'
@@ -14,18 +14,10 @@ const getUser = req => {
   return user
 }
 
-const auth = (service, req, lv_user) => service.tx(req).send({
-  method: 'POST', path: `ZC_ITEMDETAILS/${NS}.checkUserAuth`,
-  data: { is_authorized: false, change_visi: false, kunnr: '', name1: '', lv_user }
-})
-
-// P user: undefined (no restriction). D user: the Kunnr the backend assigns, or 403.
-const dealerOf = async (service, req) => {
+// P user: undefined (no restriction). D user: own Kunnr = user id without the D (as TAN does).
+const dealerOf = req => {
   const user = getUser(req)
-  if (!/^D/i.test(user)) return undefined
-  const res = await auth(service, req, user)
-  if (!res?.is_authorized || !res.kunnr) return req.reject(403, 'Access denied: User is not authorized for any dealer')
-  return res.kunnr
+  return /^D/i.test(user) ? user.replace(/^D/i, '') : undefined
 }
 
 const wrap = (tag, fn) => async req => {
@@ -40,7 +32,7 @@ const wrap = (tag, fn) => async req => {
 
 exports.read = wrap('read', async req => {
   const service = await ext()
-  const kunnr = await dealerOf(service, req)
+  const kunnr = dealerOf(req)
   if (kunnr && req.query.SELECT) {
     req.query.where(req.target.name.endsWith('ZC_ITEMDETAILS') ? { Kunnr: kunnr } : { kunnr })
   }
@@ -50,7 +42,7 @@ exports.read = wrap('read', async req => {
 // bound actions: a dealer may only touch his own items
 const bound = (tag, action, data) => wrap(tag, async req => {
   const service = await ext()
-  const kunnr = await dealerOf(service, req)
+  const kunnr = dealerOf(req)
   const key = req.params[0]
   if (kunnr && key.Kunnr !== kunnr) return req.reject(403, 'Access denied: item belongs to another dealer')
   return service.tx(req).send({ method: 'POST', path: `${item(key)}/${NS}.${action}`, data: data(req) })
@@ -59,7 +51,9 @@ const bound = (tag, action, data) => wrap(tag, async req => {
 exports.changeFrame = bound('changeFrame', 'changeFrame', req => req.data)
 exports.printForm = bound('printForm', 'printForm', () => ({}))
 
-// the user always comes from the logged-in session, never from the client (the request body is not forwarded)
-exports.checkUserAuth = wrap('checkUserAuth', async req => auth(await ext(), req, getUser(req)))
-
-exports.getUserInfo = wrap('getUserInfo', async req => ({ userId: getUser(req) }))
+// like TAN's getUserInfo: any logged-in id is returned; the P/D rule is enforced on data and actions
+exports.getUserInfo = wrap('getUserInfo', async req => {
+  const userId = req.user?.attr?.logonName || req.user?.name || req.user?.id
+  if (!userId) return req.reject(403, 'Access denied: User is not recognized as a valid ID')
+  return { userId }
+})

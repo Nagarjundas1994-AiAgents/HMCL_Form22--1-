@@ -36,7 +36,9 @@
       },
       "destinations": true,
       "connectivity": true,
-      "auth": "xsuaa"
+      "[production]": {
+        "auth": "xsuaa"
+      }
     },
     "server": {
       "body_parser": {

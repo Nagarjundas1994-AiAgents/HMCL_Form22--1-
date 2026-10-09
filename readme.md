@@ -28,7 +28,6 @@ Service path: `/odata/v4/zform22`
 | `ZI_OVS_ENGINE_VH` | Read | Free frame/engine value help |
 | `ZC_ITEMDETAILS(...)/zform22Service.changeFrame` | Bound action | `changeFrame(matnr, frameno_in, engineno_in)` |
 | `ZC_ITEMDETAILS(...)/zform22Service.printForm` | Bound action | Returns the Form 22 PDF (`ZA_PDF`) |
-| `checkUserAuth` | Action | Backend user check; user is always taken from the login, never from the request body |
 | `getUserInfo()` | Function | Returns `{ userId }` of the logged-in user |
 
 Backend base path (destination `BAS`):
@@ -37,10 +36,9 @@ Backend base path (destination `BAS`):
 ## User rules
 
 - User ID must start with **P** (internal, sees everything) or **D** (dealer). Anything else gets `403`.
-- **D users** are limited to the Kunnr returned by the backend's `checkUserAuth`:
+- **D users** are limited to the Kunnr = user ID without the leading `D` (same as TAN Maintenance):
   - reads are filtered to that Kunnr,
-  - `changeFrame` / `printForm` on another dealer's item return `403`,
-  - no Kunnr from the backend means `403`.
+  - `changeFrame` / `printForm` on another dealer's item return `403`.
 - No token means `401`.
 
 ## Prerequisites (BTP subaccount / CF space)
