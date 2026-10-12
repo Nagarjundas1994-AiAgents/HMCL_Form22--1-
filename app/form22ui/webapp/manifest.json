@@ -125,7 +125,7 @@
         },
         {
           "name": "RouteFrames",
-          "pattern": "frames/{kunnr}/{invoice}",
+          "pattern": "frames/{kunnr}/{invoice}/{frame}",
           "target": [
             "TargetFrames"
           ]

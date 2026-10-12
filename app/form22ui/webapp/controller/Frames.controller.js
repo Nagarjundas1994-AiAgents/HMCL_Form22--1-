@@ -5,12 +5,12 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageBox",
-    "sap/m/MessageToast"
-], (BaseController, History, JSONModel, Filter, FilterOperator, MessageBox, MessageToast) => {
+    "sap/m/MessageToast",
+    "sap/m/library"
+], (BaseController, History, JSONModel, Filter, FilterOperator, MessageBox, MessageToast, mobileLibrary) => {
     "use strict";
 
     const EQ = FilterOperator.EQ;
-    const CONTAINS = FilterOperator.Contains;
 
     return BaseController.extend("hmcl.form22ui.controller.Frames", {
         onInit() {
@@ -23,11 +23,10 @@ sap.ui.define([
             if (this._oView.getProperty("/preview")) {
                 this.onClosePreview();
             }
-            const { kunnr, invoice } = oEvent.getParameter("arguments");
+            const { kunnr, invoice, frame } = oEvent.getParameter("arguments");
             this._oView.setData({
-                kunnr, invoice, rows: [], selCount: 0, busy: false,
-                error: "", noData: "", filterVisible: false, filterValue: "",
-                preview: false, pdfs: [], pdfIndex: 0
+                kunnr, invoice, frame, rows: [], selCount: 0, busy: false,
+                error: "", preview: false, pdfs: [], pdfIndex: 0, printInfo: ""
             });
             this._load();
         },
@@ -42,9 +41,16 @@ sap.ui.define([
 
         // ---- loading ----------------------------------------------------------------------------
 
-        async _load() {
+        /** Filters on the invoice key, so the backend can answer for the whole invoice (Change Frame help). */
+        _invoiceFilters() {
             const { kunnr, invoice } = this._oView.getData();
-            const aFilters = [new Filter("Kunnr", EQ, kunnr), new Filter("invoice", EQ, invoice)];
+            return [new Filter("Kunnr", EQ, kunnr), new Filter("invoice", EQ, invoice)];
+        },
+
+        async _load() {
+            const { kunnr, invoice, frame } = this._oView.getData();
+            // the VIN entered on the first screen is part of the backend filter
+            const aFilters = this._invoiceFilters().concat(new Filter("frameno", EQ, frame));
             this._oView.setProperty("/busy", true);
             this._oView.setProperty("/error", "");
             try {
@@ -68,7 +74,7 @@ sap.ui.define([
                 const oEmpty = aObjects.find((oItem) => oItem.message_text);
                 this._oView.setProperty("/rows", aRows);
                 this._oView.setProperty("/selCount", 0);
-                this._oView.setProperty("/error", aRows.length ? "" : (oEmpty && oEmpty.message_text) || this.getText("noRecords", [kunnr, invoice]));
+                this._oView.setProperty("/error", aRows.length ? "" : (oEmpty && oEmpty.message_text) || this.getText("noRecords", [kunnr, invoice, frame]));
             } catch (oError) {
                 this.showError(oError);
             } finally {
@@ -76,42 +82,7 @@ sap.ui.define([
             }
         },
 
-        // ---- toolbar ----------------------------------------------------------------------------
-
-        onToggleFilter() {
-            const bVisible = !this._oView.getProperty("/filterVisible");
-            this._oView.setProperty("/filterVisible", bVisible);
-            if (!bVisible) {
-                this._oView.setProperty("/filterValue", "");
-                this._applyFilter("");
-            }
-        },
-
-        onFilter(oEvent) {
-            this._applyFilter(oEvent.getParameter("newValue") ?? oEvent.getParameter("query") ?? "");
-        },
-
-        _applyFilter(sValue) {
-            this.byId("frames").getBinding("items").filter(sValue ? [new Filter({
-                filters: ["model", "frameno", "engineno", "status"].map((sPath) => new Filter(sPath, CONTAINS, sValue)),
-                and: false
-            })] : []);
-        },
-
-        onSelectAll() {
-            this._selectVisible(true);
-        },
-
-        onDeselectAll() {
-            this._selectVisible(false);
-        },
-
-        _selectVisible(bSelected) {
-            this.byId("frames").getBinding("items").getContexts()
-                .filter((oContext) => oContext.getProperty("printable"))
-                .forEach((oContext) => this._oView.setProperty(oContext.getPath() + "/selected", bSelected));
-            this.onSelect();
-        },
+        // ---- selection --------------------------------------------------------------------------
 
         onSelect() {
             this._oView.setProperty("/selCount", this._selected().length);
@@ -124,7 +95,8 @@ sap.ui.define([
         // ---- print ------------------------------------------------------------------------------
 
         onPrint() {
-            MessageBox.confirm(this.getText("printConfirm"), {
+            const aFrames = this._selected().map((oRow) => oRow.frameno);
+            MessageBox.warning(this.getText("printConfirm", [aFrames.length, aFrames.join(", ")]), {
                 title: this.getText("printConfirmTitle"),
                 actions: [MessageBox.Action.YES, MessageBox.Action.NO],
                 emphasizedAction: MessageBox.Action.YES,
@@ -139,17 +111,19 @@ sap.ui.define([
         async _print() {
             const aRows = this._selected();
             const aPdfs = [];
+            let oRow;
             this._oView.setProperty("/busy", true);
             try {
-                for (const oRow of aRows) {
+                for (oRow of aRows) {
                     const oAction = this.getView().getModel().bindContext("zform22Service.printForm(...)", this._aContexts[oRow.i]);
                     await oAction.execute();
                     aPdfs.push({ name: oRow.frameno, url: this.pdfUrl(oAction.getBoundContext().getObject()) });
                 }
             } catch (oError) {
-                this.showError(oError);
+                MessageBox.error(this.getText("printFailed", [oRow.frameno, oError.message]));
             }
             if (aPdfs.length) {
+                this._oView.setProperty("/printInfo", this.getText("printSuccess", [aPdfs.map((oPdf) => oPdf.name).join(", ")]));
                 this._oView.setProperty("/pdfs", aPdfs);
                 this._showPdf(0);
                 this._oView.setProperty("/preview", true);
@@ -166,6 +140,11 @@ sap.ui.define([
         onPdfSelect(oEvent) {
             const sName = oEvent.getParameter("selectedItem").getKey();
             this._showPdf(this._oView.getProperty("/pdfs").findIndex((oPdf) => oPdf.name === sName));
+        },
+
+        onOpenPdf() {
+            const { pdfs, pdfIndex } = this._oView.getData();
+            mobileLibrary.URLHelper.redirect(pdfs[pdfIndex].url, true);
         },
 
         onClosePreview() {
@@ -186,13 +165,20 @@ sap.ui.define([
         },
 
         async onNewFrameHelp() {
-            const oHelp = await this.getDialog("EngineHelp");
             const { kunnr, invoice } = this._oView.getData();
-            // offer only frames that are not already in this invoice's list
-            const aFilters = [new Filter("kunnr", EQ, kunnr), new Filter("invoice", EQ, invoice)]
-                .concat(this._oView.getProperty("/rows").map((oRow) => new Filter("frameno", FilterOperator.NE, oRow.frameno)));
-            oHelp.getBinding("items").filter(new Filter({ filters: aFilters, and: true }));
-            oHelp.open("");
+            try {
+                const oHelp = await this.getDialog("EngineHelp");
+                // offer only frames that are not already in this invoice's list (the page itself shows one VIN only)
+                const aInvoice = await this.query("/ZC_ITEMDETAILS", [new Filter({ filters: this._invoiceFilters(), and: true })]);
+                const aTaken = new Set(aInvoice.map((oItem) => oItem.frameno).filter(Boolean));
+                aTaken.add(this._oChange.getProperty("/row/frameno"));
+                const aFilters = [new Filter("kunnr", EQ, kunnr), new Filter("invoice", EQ, invoice)]
+                    .concat([...aTaken].map((sFrame) => new Filter("frameno", FilterOperator.NE, sFrame)));
+                oHelp.getBinding("items").filter(new Filter({ filters: aFilters, and: true }));
+                oHelp.open("");
+            } catch (oError) {
+                this.showError(oError);
+            }
         },
 
         onNewFramePicked(oEvent) {
@@ -216,10 +202,13 @@ sap.ui.define([
                 await oAction.execute();
                 oDialog.close();
                 MessageToast.show(this.getText("frameChanged", [frameno]));
+                // the page is filtered on the VIN, so follow the item to its new VIN (reloads via _onMatched)
+                const { kunnr, invoice } = this._oView.getData();
+                this.getOwnerComponent().getRouter().navTo("RouteFrames", { kunnr, invoice, frame: frameno }, true);
             } catch (oError) {
                 this.showError(oError);
+                await this._load();
             }
-            await this._load();
         },
 
         onChangeCancel(oEvent) {

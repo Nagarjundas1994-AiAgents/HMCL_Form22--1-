@@ -120,8 +120,8 @@ sap.ui.define([
             if (!this._validate(true)) {
                 return;
             }
-            const { kunnr, invoice } = this._oView.getData();
-            this.getOwnerComponent().getRouter().navTo("RouteFrames", { kunnr, invoice });
+            const { kunnr, invoice, frame } = this._oView.getData();
+            this.getOwnerComponent().getRouter().navTo("RouteFrames", { kunnr, invoice, frame });
         },
 
         _resetDealer() {

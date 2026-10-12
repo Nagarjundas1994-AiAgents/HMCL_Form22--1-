@@ -28,7 +28,7 @@ Service path: `/odata/v4/zform22`
 | `ZI_OVS_ENGINE_VH` | Read | Free frame/engine value help |
 | `ZC_ITEMDETAILS(...)/zform22Service.changeFrame` | Bound action | `changeFrame(matnr, frameno_in, engineno_in)` |
 | `ZC_ITEMDETAILS(...)/zform22Service.printForm` | Bound action | Returns the Form 22 PDF (`ZA_PDF`) |
-| `getUserInfo()` | Function | Returns `{ userId }` of the logged-in user |
+| `getUserInfo()` | Function | Returns `{ userId, canChange }` of the logged-in user (403 if not authorized) |
 
 Backend base path (destination `BAS`):
 `/sap/opu/odata4/sap/zsrv_itemdetails_v4/srvd/sap/zsb_itemdetails/0001/`
@@ -40,6 +40,9 @@ Backend base path (destination `BAS`):
   - reads are filtered to that Kunnr,
   - `changeFrame` / `printForm` on another dealer's item return `403`.
 - No token means `401`.
+- Every read and action also calls the backend action `checkUserAuth` (cached 5 min per user):
+  `is_authorized = false` gives `403` everywhere, `change_visi = false` gives `403` on `changeFrame`
+  and hides the Change button.
 
 ## Prerequisites (BTP subaccount / CF space)
 

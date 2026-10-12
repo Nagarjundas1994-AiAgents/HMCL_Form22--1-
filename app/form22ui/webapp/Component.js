@@ -1,9 +1,8 @@
 sap.ui.define([
     "sap/ui/core/UIComponent",
     "hmcl/form22ui/model/models",
-    "sap/m/MessageBox",
     "sap/base/Log"
-], (UIComponent, models, MessageBox, Log) => {
+], (UIComponent, models, Log) => {
     "use strict";
 
     return UIComponent.extend("hmcl.form22ui.Component", {
@@ -29,37 +28,36 @@ sap.ui.define([
             this.getRouter().initialize();
         },
 
-        /** Asks the backend who the logged-in user is, same as HMCL_TAN_MAINTENANCE (_fetchUserInfo). */
+        /**
+         * Asks the backend who the logged-in user is and what they may do (checkUserAuth).
+         * Any failure keeps the session locked: no form, no Change button.
+         */
         async _loadUser() {
             const oSession = this.getModel("session");
             try {
                 const oResponse = await fetch(this.getModel().getServiceUrl() + "getUserInfo");
-                const oData = await oResponse.json();
+                const oData = await oResponse.json().catch(() => ({}));
                 if (!oResponse.ok) {
-                    const oError = new Error(oData?.error?.message || "Access Denied: Invalid User ID");
-                    oError.status = oResponse.status;
-                    throw oError;
+                    throw new Error(oData.error?.message
+                        || this.getModel("i18n").getResourceBundle().getText("userLoadFailed"));
                 }
                 // OData V4 function responses wrap properties under value or directly in object
                 const oResult = oData.value || oData;
-                const sUserId = (typeof oResult === "string" ? oResult : oResult?.userId || "").trim().toUpperCase();
+                const sUserId = (oResult.userId || "").trim().toUpperCase();
                 const bIsDealer = sUserId.startsWith("D");
                 oSession.setData({
+                    loading: false, authorized: true, error: "",
                     userId: sUserId,
                     isDealer: bIsDealer,
                     // D user: own dealer (id without the D), locked. P user: empty, editable
                     kunnr: bIsDealer ? sUserId.slice(1) : "",
                     isEditable: !bIsDealer,
-                    welcome: this.getModel("i18n").getResourceBundle().getText("welcome", [sUserId])
+                    canChange: oResult.canChange === true
                 });
             } catch (oError) {
                 Log.error("Failed to load User Info", oError, "hmcl.form22ui.Component");
-                if (oError.status === 403) {
-                    // TAN reloads on close; Fiori lint forbids location.reload()
-                    MessageBox.error(oError.message, { title: "Authorization Failure" });
-                } else {
-                    oSession.setData({ userId: "", isDealer: false, kunnr: "", isEditable: true, welcome: "" });
-                }
+                oSession.setProperty("/loading", false);
+                oSession.setProperty("/error", oError.message);
             }
         }
     });

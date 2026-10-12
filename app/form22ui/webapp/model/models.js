@@ -17,11 +17,14 @@ function (JSONModel, Device) {
         },
 
         /**
-         * Logged-in user, filled from getUserInfo (see Component.js).
+         * Logged-in user, filled from getUserInfo (see Component.js). Locked until the backend says otherwise.
          * @returns {sap.ui.model.json.JSONModel} The session model.
          */
         createSessionModel: function () {
-            return new JSONModel({ userId: "", isDealer: false, kunnr: "", isEditable: false, welcome: "" });
+            return new JSONModel({
+                loading: true, authorized: false, error: "",
+                userId: "", isDealer: false, kunnr: "", isEditable: false, canChange: false
+            });
         }
     };
 });

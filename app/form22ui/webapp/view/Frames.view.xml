@@ -2,86 +2,63 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <Page id="framesPage" class="f22Page" showHeader="true" enableScrolling="true" busy="{view>/busy}" busyIndicatorDelay="300">
-        <customHeader>
-            <Bar class="f22Bar">
-                <contentLeft>
-                    <Title text="{i18n>title}" level="H1"/>
-                </contentLeft>
-                <contentRight>
-                    <Text text="{session>/welcome}" class="f22Welcome"/>
-                </contentRight>
-            </Bar>
-        </customHeader>
+    <Page id="framesPage" showHeader="false" backgroundDesign="Solid" enableScrolling="true"
+        busy="{view>/busy}" busyIndicatorDelay="300">
         <content>
-            <Text text="{i18n>breadcrumb}" class="f22Crumb sapUiSmallMarginBeginEnd sapUiSmallMarginTop"/>
-            <Panel class="f22Panel f22Wide f22Frames sapUiSmallMargin">
-                <headerToolbar>
-                    <Toolbar class="f22PanelHdr f22PanelHdrBlue">
-                        <Title text="{i18n>frameDetails}"/>
-                    </Toolbar>
-                </headerToolbar>
-                <VBox visible="{view>/preview}">
-                    <Toolbar>
-                        <Button text="{i18n>close}" icon="sap-icon://decline" press=".onClosePreview"/>
-                        <Select items="{view>/pdfs}" change=".onPdfSelect" visible="{= ${view>/pdfs}.length > 1 }">
-                            <core:Item key="{view>name}" text="{view>name}"/>
-                        </Select>
-                    </Toolbar>
-                    <core:HTML id="pdfFrame" content=""/>
-                </VBox>
-                <VBox visible="{= !${view>/preview} }">
-                <HBox alignItems="Center" class="sapUiSmallMarginBottom">
-                    <Button text="{i18n>back}" icon="sap-icon://nav-back" press=".onBack" class="sapUiSmallMarginEnd"/>
-                    <Label text="{i18n>invoiceNumber}:" labelFor="invoiceNo" design="Bold" class="sapUiTinyMarginEnd"/>
-                    <Input id="invoiceNo" value="{view>/invoice}" editable="false" width="11rem"/>
-                </HBox>
+            <VBox visible="{view>/preview}">
+                <MessageStrip text="{view>/printInfo}" type="Success" showIcon="true" class="sapUiSmallMargin"/>
+                <OverflowToolbar>
+                    <Button text="{i18n>close}" icon="sap-icon://decline" press=".onClosePreview"/>
+                    <Select items="{view>/pdfs}" change=".onPdfSelect" visible="{= ${view>/pdfs}.length > 1 }">
+                        <core:Item key="{view>name}" text="{view>name}"/>
+                    </Select>
+                    <ToolbarSpacer/>
+                    <!-- phones cannot show a PDF inside the page: open it in the browser's own viewer -->
+                    <Button text="{i18n>openPdf}" icon="sap-icon://pdf-attachment" press=".onOpenPdf"/>
+                </OverflowToolbar>
+                <core:HTML id="pdfFrame" content=""/>
+            </VBox>
+            <VBox visible="{= !${view>/preview} }">
                 <MessageStrip text="{view>/error}" type="Warning" showIcon="true"
-                    visible="{= !!${view>/error} }" class="sapUiSmallMarginBottom"/>
-                <Table id="frames" items="{view>/rows}" growing="true" growingThreshold="50"
-                    sticky="ColumnHeaders,HeaderToolbar" noDataText="{i18n>noData}" class="f22Table">
+                    visible="{= !!${view>/error} }" class="sapUiSmallMargin"/>
+                <Table id="frames" items="{view>/rows}" noDataText="{i18n>noData}" popinLayout="GridSmall">
                     <headerToolbar>
                         <OverflowToolbar>
-                            <Button text="{i18n>filter}" icon="sap-icon://filter" type="Transparent" press=".onToggleFilter"
-                                enabled="{= ${view>/rows}.length > 0 }"/>
-                            <Button text="{i18n>print}" icon="sap-icon://print" type="Transparent" press=".onPrint"
-                                enabled="{= ${view>/selCount} > 0 }"/>
-                            <Button text="{i18n>change}" icon="sap-icon://edit" type="Transparent" press=".onChange"
-                                visible="{session>/isEditable}" enabled="{= ${view>/selCount} === 1 }"/>
-                            <Button text="{i18n>selectAll}" icon="sap-icon://multiselect-all" type="Transparent"
-                                press=".onSelectAll" visible="{session>/isEditable}" enabled="{= ${view>/rows}.length > 0 }"/>
-                            <Button text="{i18n>deselectAll}" icon="sap-icon://multiselect-none" type="Transparent"
-                                press=".onDeselectAll" visible="{session>/isEditable}" enabled="{= ${view>/selCount} > 0 }"/>
+                            <Button icon="sap-icon://nav-back" type="Transparent" tooltip="{i18n>back}" press=".onBack"/>
+                            <Title text="{i18n>frameDetails}" level="H2"/>
                             <ToolbarSpacer/>
-                            <SearchField width="18rem" visible="{view>/filterVisible}" value="{view>/filterValue}"
-                                placeholder="{i18n>filterPlaceholder}" liveChange=".onFilter" search=".onFilter"/>
+                            <Button text="{i18n>print}" icon="sap-icon://print" type="Emphasized" press=".onPrint"
+                                enabled="{= ${view>/selCount} > 0 }"/>
+                            <Button text="{i18n>change}" icon="sap-icon://edit" press=".onChange"
+                                visible="{session>/canChange}" enabled="{= ${view>/selCount} === 1 }"/>
                         </OverflowToolbar>
                     </headerToolbar>
+                    <infoToolbar>
+                        <OverflowToolbar>
+                            <Text text="{i18n>invoiceNumber}: {view>/invoice}" class="sapUiSmallMarginEnd"/>
+                            <Text text="{i18n>vinNumber}: {view>/frame}"/>
+                        </OverflowToolbar>
+                    </infoToolbar>
                     <columns>
+                        <Column width="4rem" hAlign="Center"><Text text="{i18n>select}"/></Column>
                         <Column><Text text="{i18n>model}"/></Column>
-                        <Column minScreenWidth="Tablet" demandPopin="true" width="15rem"><Text text="{i18n>frameNumber}"/></Column>
-                        <Column minScreenWidth="Tablet" demandPopin="true" width="13rem"><Text text="{i18n>engineNumber}"/></Column>
-                        <Column minScreenWidth="Tablet" demandPopin="true" width="12rem"><Text text="{i18n>printStatus}"/></Column>
-                        <Column hAlign="Center" width="9rem"><Text text="{i18n>selectForPrinting}"/></Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>frameNumber}"/></Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>engineNumber}"/></Column>
+                        <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>printStatus}"/></Column>
                     </columns>
                     <items>
                         <ColumnListItem>
                             <cells>
+                                <CheckBox selected="{view>selected}" enabled="{view>printable}" select=".onSelect"/>
                                 <Text text="{view>model}"/>
                                 <Text text="{view>frameno}"/>
                                 <Text text="{view>engineno}"/>
-                                <Text text="{view>status}" class="f22Status">
-                                    <customData>
-                                        <core:CustomData key="status" value="{view>status}" writeToDom="true"/>
-                                    </customData>
-                                </Text>
-                                <CheckBox selected="{view>selected}" enabled="{view>printable}" select=".onSelect"/>
+                                <ObjectStatus text="{view>status}" state="{= ${view>printable} ? 'Information' : 'Success' }"/>
                             </cells>
                         </ColumnListItem>
                     </items>
                 </Table>
-                </VBox>
-            </Panel>
+            </VBox>
         </content>
     </Page>
 </mvc:View>
