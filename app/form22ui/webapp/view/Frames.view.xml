@@ -2,7 +2,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <Page id="framesPage" showHeader="false" backgroundDesign="Solid" enableScrolling="true"
+    <Page id="framesPage" showHeader="false" backgroundDesign="List" enableScrolling="true"
         busy="{view>/busy}" busyIndicatorDelay="300">
         <content>
             <VBox visible="{view>/preview}">
@@ -19,26 +19,23 @@
                 <core:HTML id="pdfFrame" content=""/>
             </VBox>
             <VBox visible="{= !${view>/preview} }">
+                <OverflowToolbar style="Clear">
+                    <Button icon="sap-icon://nav-back" type="Transparent" tooltip="{i18n>back}" press=".onBack"/>
+                    <Title text="{i18n>frameDetails}" level="H2"/>
+                    <ToolbarSpacer/>
+                    <Button text="{i18n>print}" icon="sap-icon://print" type="Emphasized" press=".onPrint"
+                        enabled="{= ${view>/selCount} > 0 }"/>
+                    <Button text="{i18n>change}" icon="sap-icon://edit" press=".onChange"
+                        visible="{session>/canChange}" enabled="{= ${view>/selCount} === 1 }"/>
+                </OverflowToolbar>
+                <!-- wraps onto two lines on phones instead of cutting the numbers off -->
+                <FlexBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <ObjectAttribute title="{i18n>invoiceNumber}" text="{view>/invoice}" class="sapUiMediumMarginEnd sapUiTinyMarginBottom"/>
+                    <ObjectAttribute title="{i18n>vinNumber}" text="{view>/frame}" class="sapUiTinyMarginBottom"/>
+                </FlexBox>
                 <MessageStrip text="{view>/error}" type="Warning" showIcon="true"
                     visible="{= !!${view>/error} }" class="sapUiSmallMargin"/>
                 <Table id="frames" items="{view>/rows}" noDataText="{i18n>noData}" popinLayout="GridSmall">
-                    <headerToolbar>
-                        <OverflowToolbar>
-                            <Button icon="sap-icon://nav-back" type="Transparent" tooltip="{i18n>back}" press=".onBack"/>
-                            <Title text="{i18n>frameDetails}" level="H2"/>
-                            <ToolbarSpacer/>
-                            <Button text="{i18n>print}" icon="sap-icon://print" type="Emphasized" press=".onPrint"
-                                enabled="{= ${view>/selCount} > 0 }"/>
-                            <Button text="{i18n>change}" icon="sap-icon://edit" press=".onChange"
-                                visible="{session>/canChange}" enabled="{= ${view>/selCount} === 1 }"/>
-                        </OverflowToolbar>
-                    </headerToolbar>
-                    <infoToolbar>
-                        <OverflowToolbar>
-                            <Text text="{i18n>invoiceNumber}: {view>/invoice}" class="sapUiSmallMarginEnd"/>
-                            <Text text="{i18n>vinNumber}: {view>/frame}"/>
-                        </OverflowToolbar>
-                    </infoToolbar>
                     <columns>
                         <Column width="4rem" hAlign="Center"><Text text="{i18n>select}"/></Column>
                         <Column><Text text="{i18n>model}"/></Column>

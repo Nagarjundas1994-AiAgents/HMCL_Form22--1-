@@ -17,6 +17,7 @@
   },
   "scripts": {
     "start": "cds-serve",
+    "watch:local": "cds watch --profile local",
     "undeploy": "cf undeploy hmcl_Form22 --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
@@ -38,6 +39,17 @@
       "connectivity": true,
       "[production]": {
         "auth": "xsuaa"
+      },
+      "[local]": {
+        "auth": {
+          "kind": "mocked",
+          "users": {
+            "*": true
+          }
+        },
+        "ZSB_ITEMDETAILS0001": {
+          "impl": "test/mock-backend.js"
+        }
       }
     },
     "server": {

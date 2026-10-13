@@ -66,7 +66,35 @@ Undeploy (deletes services too): `npm run undeploy`
 
 ## Running locally
 
-Login is always XSUAA, there are no mock users or mock data. To run against the real services, bind them first:
+### Front end with dummy users and data (no BTP, no S/4)
+
+```bash
+npm run watch:local          # or: npx cds watch --profile local --port 4005
+```
+
+Open the launchpad sandbox <http://localhost:4004/hmcl.form22ui/test/flp.html#app-preview>
+or the plain app <http://localhost:4004/hmcl.form22ui/index.html>. The browser asks for a login: any user name works,
+the password is ignored. Use a private window per user to switch users.
+Not `preview.html`: that Fiori tools variants editor assumes the app is served at `/` and cannot load it under `/hmcl.form22ui/`.
+
+| User | What it tests |
+|---|---|
+| `P09812` | internal user, may change frames |
+| `P00001` | internal user, no Change button (`change_visi = false`) |
+| `D1001` | dealer 1001: dealer code locked, sees only his invoices |
+| `P99999` | `is_authorized = false`: "No Access" page |
+| any other `P…`/`D…` | authorized; Change only for `P…` |
+| anything else | rejected by the P/D rule |
+
+Test data (dealer / invoice / VIN): `1001 / 4647347 / MBLHAW220P4B15723` (pending), `1001 / 4647347 / MBLHAW220P4B15724` (printed),
+`1001 / 4647348 / MBLJAR031P9C00418`, `1002 / 5550001 / MBLHAR073P5D01234`. Change Frame can switch to the free frames
+`MBLHAW220P4B15799` (invoice 4647347) and `MBLJAR031P9C00499` (invoice 4647348).
+Data lives in memory in [test/mock-backend.js](test/mock-backend.js): restart to reset printed statuses and changed frames.
+The profile swaps the S/4 service for that mock and [server.js](server.js) strips the `/srv-api` prefix the approuter normally removes.
+
+### Against the real services
+
+To run against the real services, bind them first:
 
 ```bash
 cds bind --to hmcl_Form22-xsuaa-service,hmcl_Form22-destination-service,hmcl_Form22-connectivity
