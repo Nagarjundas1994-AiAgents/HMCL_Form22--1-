@@ -26,7 +26,7 @@
                     <Button text="{i18n>print}" icon="sap-icon://print" type="Emphasized" press=".onPrint"
                         enabled="{= ${view>/selCount} > 0 }"/>
                     <Button text="{i18n>change}" icon="sap-icon://edit" press=".onChange"
-                        visible="{session>/canChange}" enabled="{= ${view>/selCount} === 1 }"/>
+                        enabled="{= ${view>/selCount} === 1 }"/>
                 </OverflowToolbar>
                 <!-- wraps onto two lines on phones instead of cutting the numbers off -->
                 <FlexBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">

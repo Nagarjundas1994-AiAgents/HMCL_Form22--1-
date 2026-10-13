@@ -2,13 +2,10 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.ui.layout.form">
-    <Page id="mainPage" showHeader="false" backgroundDesign="List" showFooter="{session>/authorized}"
-        busy="{session>/loading}" busyIndicatorDelay="0">
+    <Page id="mainPage" showHeader="false" backgroundDesign="List">
         <content>
-            <IllustratedMessage illustrationType="sapIllus-UnableToLoad" title="{i18n>accessDenied}"
-                description="{session>/error}" visible="{= !!${session>/error} }"/>
             <!-- labels on top, left-aligned, on every screen size; fields capped at half the width on large screens -->
-            <f:SimpleForm id="invoiceForm" editable="true" layout="ResponsiveGridLayout" visible="{session>/authorized}"
+            <f:SimpleForm id="invoiceForm" editable="true" layout="ResponsiveGridLayout"
                 labelSpanXL="12" labelSpanL="12" labelSpanM="12" labelSpanS="12" adjustLabelSpan="false"
                 emptySpanXL="7" emptySpanL="6" emptySpanM="4" emptySpanS="0"
                 columnsXL="1" columnsL="1" columnsM="1" singleContainerFullSize="false">

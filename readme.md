@@ -28,7 +28,7 @@ Service path: `/odata/v4/zform22`
 | `ZI_OVS_ENGINE_VH` | Read | Free frame/engine value help |
 | `ZC_ITEMDETAILS(...)/zform22Service.changeFrame` | Bound action | `changeFrame(matnr, frameno_in, engineno_in)` |
 | `ZC_ITEMDETAILS(...)/zform22Service.printForm` | Bound action | Returns the Form 22 PDF (`ZA_PDF`) |
-| `getUserInfo()` | Function | Returns `{ userId, canChange }` of the logged-in user (403 if not authorized) |
+| `getUserInfo()` | Function | Returns `{ userId }` of the logged-in user (403 if the ID does not start with P or D) |
 
 Backend base path (destination `BAS`):
 `/sap/opu/odata4/sap/zsrv_itemdetails_v4/srvd/sap/zsb_itemdetails/0001/`
@@ -39,10 +39,8 @@ Backend base path (destination `BAS`):
 - **D users** are limited to the Kunnr = user ID without the leading `D` (same as TAN Maintenance):
   - reads are filtered to that Kunnr,
   - `changeFrame` / `printForm` on another dealer's item return `403`.
+- P and D users may both change frames; a D user only on items of his own Kunnr.
 - No token means `401`.
-- Every read and action also calls the backend action `checkUserAuth` (cached 5 min per user):
-  `is_authorized = false` gives `403` everywhere, `change_visi = false` gives `403` on `changeFrame`
-  and hides the Change button.
 
 ## Prerequisites (BTP subaccount / CF space)
 
@@ -79,12 +77,9 @@ Not `preview.html`: that Fiori tools variants editor assumes the app is served a
 
 | User | What it tests |
 |---|---|
-| `P09812` | internal user, may change frames |
-| `P00001` | internal user, no Change button (`change_visi = false`) |
-| `D1001` | dealer 1001: dealer code locked, sees only his invoices |
-| `P99999` | `is_authorized = false`: "No Access" page |
-| any other `P…`/`D…` | authorized; Change only for `P…` |
-| anything else | rejected by the P/D rule |
+| any `P…` (e.g. `P09812`) | internal user: any dealer |
+| `D1001` | dealer 1001: dealer code locked, sees and changes only his invoices |
+| anything else (e.g. `alice`) | app opens, but every data call is refused by the P/D rule (403 message), as in TAN |
 
 Test data (dealer / invoice / VIN): `1001 / 4647347 / MBLHAW220P4B15723` (pending), `1001 / 4647347 / MBLHAW220P4B15724` (printed),
 `1001 / 4647348 / MBLJAR031P9C00418`, `1002 / 5550001 / MBLHAR073P5D01234`. Change Frame can switch to the free frames

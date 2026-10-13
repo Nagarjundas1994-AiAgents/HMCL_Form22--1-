@@ -3,14 +3,6 @@
 // Data lives in memory: restart the server to get it back to the start state.
 const cds = require('@sap/cds')
 
-// what checkUserAuth answers per user; anyone else: authorized, may change frames when a P user
-const USERS = {
-  P09812: { is_authorized: true, change_visi: true },   // internal user, may change frames
-  P00001: { is_authorized: true, change_visi: false },  // internal user, display + print only
-  D1001: { is_authorized: true, change_visi: false },   // dealer 1001, sees only his own invoices
-  P99999: { is_authorized: false, change_visi: false }  // no access to the app
-}
-
 const DEALERS = [
   { kunnr: '1001', name1: 'Hero Motors Delhi', ort01: 'New Delhi' },
   { kunnr: '1002', name1: 'Speed Wheels Mumbai', ort01: 'Mumbai' }
@@ -96,10 +88,6 @@ module.exports = class MockBackend extends cds.Service {
 
   async send ({ path, data }) {
     const action = path.split('.').pop()
-    if (action === 'checkUserAuth') {
-      const id = data.lv_user
-      return { lv_user: id, kunnr: '', name1: '', ...(USERS[id] ?? { is_authorized: true, change_visi: id.startsWith('P') }) }
-    }
     const key = Object.fromEntries([...path.matchAll(/(\w+)='((?:[^']|'')*)'/g)].map(([, k, v]) => [k, v.replace(/''/g, "'")]))
     const it = ITEMS.find(i => ['Kunnr', 'invoice', 'frameno', 'engineno'].every(k => i[k] === key[k]))
       ?? fail(404, `Frame ${key.frameno} not found`)

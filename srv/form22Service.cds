@@ -23,6 +23,6 @@ service zform22Service {
     entity ZI_OVS_ENGINE_VH as projection on external.ZI_OVS_ENGINE_VH;
 
 
-    function getUserInfo() returns { userId : String; canChange : Boolean };
+    function getUserInfo() returns { userId : String };
                          
 }
