@@ -21,17 +21,9 @@
                 <core:HTML id="pdfFrame" content=""/>
             </VBox>
             <VBox visible="{= !${view>/preview} }">
-                <!-- filters: one row on desktop, stacked on phones -->
+                <!-- filters: one row on desktop, stacked on phones; their buttons follow below -->
                 <OverflowToolbar style="Clear">
                     <Title text="{i18n>invoiceDetails}" level="H2"/>
-                    <ToolbarSpacer/>
-                    <Button text="{i18n>continue}" type="Emphasized" press=".onContinue"
-                        visible="{= ${view>/step} === 1 }"/>
-                    <Button text="{i18n>proceed}" type="Emphasized" press=".onProceed"
-                        visible="{= ${view>/step} === 2 }"/>
-                    <Button text="{i18n>changeInvoice}" press=".onChangeInvoice"
-                        visible="{= ${view>/step} === 2 }"/>
-                    <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
                 </OverflowToolbar>
                 <l:Grid defaultSpan="XL4 L4 M6 S12">
                     <VBox>
@@ -60,6 +52,15 @@
                             valueState="{view>/frameState}" valueStateText="{view>/frameError}"/>
                     </VBox>
                 </l:Grid>
+                <FlexBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiSmallMarginBottom">
+                    <Button text="{i18n>continue}" type="Emphasized" press=".onContinue"
+                        visible="{= ${view>/step} === 1 }" class="sapUiTinyMarginEnd"/>
+                    <Button text="{i18n>proceed}" type="Emphasized" press=".onProceed"
+                        visible="{= ${view>/step} === 2 }" class="sapUiTinyMarginEnd"/>
+                    <Button text="{i18n>changeInvoice}" press=".onChangeInvoice"
+                        visible="{= ${view>/step} === 2 }" class="sapUiTinyMarginEnd"/>
+                    <Button text="{i18n>refresh}" icon="sap-icon://refresh" press=".onRefresh"/>
+                </FlexBox>
 
                 <!-- results of the last Proceed; the filters above may already hold the next search -->
                 <VBox visible="{= !!${view>/result} }">
