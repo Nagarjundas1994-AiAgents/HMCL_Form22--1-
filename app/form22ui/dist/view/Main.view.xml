@@ -1,69 +1,105 @@
 <mvc:View controllerName="hmcl.form22ui.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" class="f22Page" showHeader="true" enableScrolling="true">
-        <customHeader>
-            <Bar class="f22Bar">
-                <contentLeft>
-                    <Title text="{i18n>title}" level="H1"/>
-                </contentLeft>
-                <contentRight>
-                    <Text text="{session>/welcome}" class="f22Welcome"/>
-                </contentRight>
-            </Bar>
-        </customHeader>
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
+    <!-- no page scrolling during the PDF preview, so the viewer can fill the page exactly -->
+    <Page id="mainPage" showHeader="false" backgroundDesign="List" enableScrolling="{= !${view>/preview} }"
+        busy="{view>/busy}" busyIndicatorDelay="300">
         <content>
-            <Text text="{i18n>breadcrumb}" class="f22Crumb sapUiSmallMarginBeginEnd sapUiSmallMarginTop"/>
-            <MessageStrip text="{session>/error}" type="Error" showIcon="true"
-                visible="{= !!${session>/error} }" class="sapUiSmallMargin"/>
-            <Panel class="f22Panel f22Narrow sapUiSmallMargin">
-                <headerToolbar>
-                    <Toolbar class="f22PanelHdr">
-                        <Title text="{i18n>invoiceDetails}"/>
-                    </Toolbar>
-                </headerToolbar>
-                <VBox class="sapUiSmallMargin">
-                    <HBox alignItems="Start" class="f22Row">
-                        <Label text="{i18n>dealerCode}" labelFor="dealer" design="Bold" required="true" width="9rem" class="f22Lbl"/>
-                        <VBox>
-                            <HBox alignItems="Center">
-                                <Input id="dealer" value="{view>/kunnr}" maxLength="10" width="9rem"
-                                    placeholder="{i18n>dealerPlaceholder}"
-                                    editable="{session>/canChangeDealer}" showValueHelp="true"
-                                    valueHelpRequest=".onDealerHelp" change=".onDealerChange"
-                                    valueState="{view>/dealerState}" valueStateText="{view>/dealerError}"/>
-                                <Text text="{view>/name1}" class="f22DealerName sapUiSmallMarginBegin"/>
-                            </HBox>
-                            <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}"
-                                press=".onRefresh" class="f22Refresh"/>
-                        </VBox>
-                    </HBox>
-                    <HBox alignItems="Start" class="f22Row">
-                        <Label text="{i18n>invoiceNumber}" labelFor="invoice" design="Bold" required="true" width="9rem" class="f22Lbl"/>
-                        <Input id="invoice" value="{view>/invoice}" maxLength="10" width="12rem"
+            <VBox visible="{view>/preview}" renderType="Bare" height="100%">
+                <MessageStrip text="{view>/printInfo}" type="Success" showIcon="true" class="sapUiSmallMargin"/>
+                <OverflowToolbar>
+                    <Button text="{i18n>close}" icon="sap-icon://decline" press=".onClosePreview"/>
+                    <Select items="{view>/pdfs}" change=".onPdfSelect" visible="{= ${view>/pdfs}.length > 1 }">
+                        <core:Item key="{view>name}" text="{view>name}"/>
+                    </Select>
+                    <ToolbarSpacer/>
+                    <!-- phones cannot show a PDF inside the page: open it in the browser's own viewer -->
+                    <Button text="{i18n>openPdf}" icon="sap-icon://pdf-attachment" press=".onOpenPdf"/>
+                </OverflowToolbar>
+                <core:HTML id="pdfFrame" content=""/>
+            </VBox>
+            <VBox visible="{= !${view>/preview} }">
+                <!-- filters: one row on desktop, stacked on phones -->
+                <OverflowToolbar style="Clear">
+                    <Title text="{i18n>invoiceDetails}" level="H2"/>
+                    <ToolbarSpacer/>
+                    <Button text="{i18n>continue}" type="Emphasized" press=".onContinue"
+                        visible="{= ${view>/step} === 1 }"/>
+                    <Button text="{i18n>proceed}" type="Emphasized" press=".onProceed"
+                        visible="{= ${view>/step} === 2 }"/>
+                    <Button text="{i18n>changeInvoice}" press=".onChangeInvoice"
+                        visible="{= ${view>/step} === 2 }"/>
+                    <Button icon="sap-icon://refresh" type="Transparent" tooltip="{i18n>refresh}" press=".onRefresh"/>
+                </OverflowToolbar>
+                <l:Grid defaultSpan="XL4 L4 M6 S12">
+                    <VBox>
+                        <Label text="{i18n>dealerCode}" required="true" labelFor="dealer"/>
+                        <Input id="dealer" value="{view>/kunnr}" maxLength="10"
+                            placeholder="{i18n>dealerPlaceholder}"
+                            editable="{session>/isEditable}" showValueHelp="true"
+                            valueHelpRequest=".onDealerHelp" change=".onDealerChange"
+                            valueState="{view>/dealerState}" valueStateText="{view>/dealerError}"/>
+                        <Text text="{view>/name1}" visible="{= !!${view>/name1} }" class="sapUiTinyMarginTop"/>
+                    </VBox>
+                    <VBox>
+                        <Label text="{i18n>invoiceNumber}" required="true" labelFor="invoice"/>
+                        <Input id="invoice" value="{view>/invoice}" maxLength="10"
                             placeholder="{i18n>invoicePlaceholder}"
-                            editable="{= ${session>/authorized} &amp;&amp; ${view>/step} === 1 }" showValueHelp="true"
+                            editable="{= ${view>/step} === 1 }" showValueHelp="true"
                             valueHelpRequest=".onInvoiceHelp" change=".onInvoiceChange" submit=".onContinue"
                             valueState="{view>/invoiceState}" valueStateText="{view>/invoiceError}"/>
-                    </HBox>
-                    <HBox alignItems="Start" class="f22Row" visible="{= ${view>/step} === 2 }">
-                        <Label text="{i18n>vinNumber}" labelFor="vin" design="Bold" required="true" width="9rem" class="f22Lbl"/>
-                        <Input id="vin" value="{view>/frame}" maxLength="17" width="14rem"
+                    </VBox>
+                    <VBox visible="{= ${view>/step} === 2 }">
+                        <Label text="{i18n>vinNumber}" required="true" labelFor="vin"/>
+                        <Input id="vin" value="{view>/frame}" maxLength="17"
                             placeholder="{i18n>vinPlaceholder}"
-                            editable="{session>/authorized}" showValueHelp="true"
+                            showValueHelp="true"
                             valueHelpRequest=".onVinHelp" change=".onFrameChange" submit=".onProceed"
                             valueState="{view>/frameState}" valueStateText="{view>/frameError}"/>
-                    </HBox>
+                    </VBox>
+                </l:Grid>
+
+                <!-- results of the last Proceed; the filters above may already hold the next search -->
+                <VBox visible="{= !!${view>/result} }">
+                    <OverflowToolbar style="Clear">
+                        <Title text="{i18n>frameDetails}" level="H2"/>
+                        <ToolbarSpacer/>
+                        <Button text="{i18n>print}" icon="sap-icon://print" type="Emphasized" press=".onPrint"
+                            enabled="{= ${view>/selCount} > 0 }"/>
+                        <Button text="{i18n>change}" icon="sap-icon://edit" press=".onChangeFrame"
+                            enabled="{= ${view>/selCount} === 1 }"/>
+                    </OverflowToolbar>
+                    <!-- wraps onto two lines on phones instead of cutting the numbers off -->
+                    <FlexBox wrap="Wrap" class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                        <ObjectAttribute title="{i18n>invoiceNumber}" text="{view>/result/invoice}" class="sapUiMediumMarginEnd sapUiTinyMarginBottom"/>
+                        <ObjectAttribute title="{i18n>vinNumber}" text="{view>/result/frame}" class="sapUiTinyMarginBottom"/>
+                    </FlexBox>
+                    <MessageStrip text="{view>/error}" type="Warning" showIcon="true"
+                        visible="{= !!${view>/error} }" class="sapUiSmallMargin"/>
+                    <Table id="frames" items="{view>/rows}" noDataText="{i18n>noData}" popinLayout="GridSmall">
+                        <columns>
+                            <Column width="4rem" hAlign="Center"><Text text="{i18n>select}"/></Column>
+                            <Column><Text text="{i18n>model}"/></Column>
+                            <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>frameNumber}"/></Column>
+                            <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>engineNumber}"/></Column>
+                            <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>printStatus}"/></Column>
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <CheckBox selected="{view>selected}" enabled="{view>printable}" select=".onSelect"/>
+                                    <Text text="{view>model}"/>
+                                    <Text text="{view>frameno}"/>
+                                    <Text text="{view>engineno}"/>
+                                    <ObjectStatus text="{view>status}" state="{= ${view>printable} ? 'Information' : 'Success' }"/>
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
                 </VBox>
-                <HBox class="sapUiSmallMarginBegin sapUiSmallMarginBottom">
-                    <Button text="{i18n>continue}" type="Emphasized" press=".onContinue"
-                        visible="{= ${view>/step} === 1 }" enabled="{session>/authorized}"/>
-                    <Button text="{i18n>changeInvoice}" press=".onChangeInvoice" class="sapUiTinyMarginEnd"
-                        visible="{= ${view>/step} === 2 }"/>
-                    <Button text="{i18n>proceed}" type="Emphasized" icon="sap-icon://navigation-right-arrow"
-                        press=".onProceed" visible="{= ${view>/step} === 2 }"/>
-                </HBox>
-            </Panel>
+            </VBox>
         </content>
     </Page>
 </mvc:View>

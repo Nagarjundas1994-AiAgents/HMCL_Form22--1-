@@ -122,23 +122,12 @@
           "target": [
             "TargetMain"
           ]
-        },
-        {
-          "name": "RouteFrames",
-          "pattern": "frames/{kunnr}/{invoice}/{frame}",
-          "target": [
-            "TargetFrames"
-          ]
         }
       ],
       "targets": {
         "TargetMain": {
           "id": "Main",
           "name": "Main"
-        },
-        "TargetFrames": {
-          "id": "Frames",
-          "name": "Frames"
         }
       }
     },

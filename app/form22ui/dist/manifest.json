@@ -23,7 +23,7 @@
 		},
 		"dataSources": {
 			"mainService": {
-				"uri": "/odata/v4/zform22/",
+				"uri": "/srv-api/odata/v4/zform22/",
 				"type": "OData",
 				"settings": {
 					"annotations": [],
@@ -122,23 +122,12 @@
 					"target": [
 						"TargetMain"
 					]
-				},
-				{
-					"name": "RouteFrames",
-					"pattern": "frames/{kunnr}/{invoice}",
-					"target": [
-						"TargetFrames"
-					]
 				}
 			],
 			"targets": {
 				"TargetMain": {
 					"id": "Main",
 					"name": "Main"
-				},
-				"TargetFrames": {
-					"id": "Frames",
-					"name": "Frames"
 				}
 			}
 		},

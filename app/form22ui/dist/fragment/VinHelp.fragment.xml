@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
     <Dialog title="{i18n>vinTitle}" contentWidth="46rem" contentHeight="34rem" draggable="true" resizable="true"
         stretch="{device>/system/phone}">
-        <Panel class="f22Search">
+        <Panel>
             <headerToolbar>
                 <Toolbar>
                     <Title text="{i18n>searchCriteria}"/>
@@ -32,10 +32,10 @@
                 </Toolbar>
             </headerToolbar>
             <columns>
-                <Column><Text text="{i18n>material}"/></Column>
+                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>material}"/></Column>
                 <Column><Text text="{i18n>frameNo}"/></Column>
-                <Column><Text text="{i18n>engineNo}"/></Column>
-                <Column><Text text="{i18n>dispatchDate}"/></Column>
+                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>engineNo}"/></Column>
+                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>dispatchDate}"/></Column>
             </columns>
             <items>
                 <ColumnListItem>
